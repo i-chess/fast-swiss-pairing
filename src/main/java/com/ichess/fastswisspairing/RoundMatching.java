@@ -15,6 +15,10 @@ public class RoundMatching {
         this.round = round;
     }
 
+    /**
+     * return unmodifieable list of the round matches
+     * @return unmodifieable list of the round matches
+     */
     public List<Match> getMatches() {
         return Collections.unmodifiableList(matches);
     }
@@ -56,15 +60,10 @@ public class RoundMatching {
         return false;
     }
 
-    public Match getMatch(Player player1, Player player2) {
-        for (Match match : matches) {
-            if ((match.getPlayer1().equals(player1)) && (match.getPlayer2().equals(player2))) {
-                return match;
-            }
-        }
-        return null;
-    }
-
+    /**
+     * return true iff all the round matches have assigned results
+     * @return true iff all the round matches have assigned results
+     */
     public boolean hasAllResults() {
         for (Match match : matches) {
             if (!match.hasResult()) {

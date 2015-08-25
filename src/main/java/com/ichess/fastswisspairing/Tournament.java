@@ -21,6 +21,12 @@ public class Tournament {
     private List<RoundMatching> allMatchings = new ArrayList<RoundMatching>();
     private Random random = new Random();
 
+    /**
+     * create a new tournmant
+     * @param rounds number of rounds in the tournment. must be >= 1
+     * @param numberOfPlayers number of players in the tournment. must be >= twice the number of rounds
+     * @param names list of player names. if null, players will be named "player-1".."player-N"
+     */
     public Tournament(int rounds, int numberOfPlayers, List<String> names) {
         if (rounds <= 0) {
             throw new IllegalArgumentException("Illegal number of rounds " + rounds);
@@ -65,57 +71,73 @@ public class Tournament {
         return new ArrayList<Player>(players);
     }
 
-    public RoundMatching nextRound() {
+    private RoundMatching firstRoundOrderedMatching()
+    {
+        RoundMatching matching = new RoundMatching(currentRound);
+        int index = 0;
+        while (index < numberOfPlayers - 1) {
+            Match match = new Match(currentRound, getPlayer(index), getPlayer(index + 1));
+            allMatches.add(match);
+            matching.addMatch(match.getPlayer1(), match.getPlayer2());
+            index += 2;
+        }
+        allMatchings.add(matching);
+        return matching;
+    }
+
+    private RoundMatching firstRoundRandomdMatching()
+    {
+        RoundMatching matching = new RoundMatching(currentRound);
+        List<Player> notPairedYet = new ArrayList<Player>(players);
+        while (notPairedYet.size() > 1) {
+            int player1Index = random.nextInt(notPairedYet.size());
+            Player player1 = notPairedYet.get(player1Index);
+            notPairedYet.remove(player1Index);
+            int player2Index = random.nextInt(notPairedYet.size());
+            Player player2 = notPairedYet.get(player2Index);
+            notPairedYet.remove(player2Index);
+            Match match = new Match(currentRound, player1, player2);
+            allMatches.add(match);
+            matching.addMatch(match.getPlayer1(), match.getPlayer2());
+        }
+        allMatchings.add(matching);
+        return matching;
+    }
+
+    /**
+     * moves to next round, and return the next round matches
+     * @return next round matches
+     */
+    public synchronized RoundMatching pairNextRound() {
         currentRound++;
         if (currentRound > rounds) {
             throw new IllegalArgumentException("Tournament ended after " + rounds + " rounds");
         }
         if (currentRound == 1) {
-            // first round
-            RoundMatching matching = new RoundMatching(currentRound);
+            // first round matching
             if (firstRoundMatchingRule == FirstRoundMatchingRule.FIRST_ROUND_MATCH_ORDERED) {
+                return firstRoundOrderedMatching();
 
-                int index = 0;
-                while (index < numberOfPlayers - 1) {
-                    Match match = new Match(currentRound, getPlayer(index), getPlayer(index + 1));
-                    allMatches.add(match);
-                    matching.addMatch(match.getPlayer1(), match.getPlayer2());
-                    index += 2;
-                }
-                allMatchings.add(matching);
-                return matching;
             }
             if (firstRoundMatchingRule == FirstRoundMatchingRule.FIRST_ROUND_MATCH_RANDOM) {
-                List<Player> notPairedYet = new ArrayList<Player>(players);
-                while (notPairedYet.size() > 1) {
-                    int player1Index = random.nextInt(notPairedYet.size());
-                    Player player1 = notPairedYet.get(player1Index);
-                    notPairedYet.remove(player1Index);
-                    int player2Index = random.nextInt(notPairedYet.size());
-                    Player player2 = notPairedYet.get(player2Index);
-                    notPairedYet.remove(player2Index);
-                    Match match = new Match(currentRound, player1, player2);
-                    allMatches.add(match);
-                    matching.addMatch(match.getPlayer1(), match.getPlayer2());
-                }
-                allMatchings.add(matching);
-                return matching;
+                return firstRoundRandomdMatching();
+
             }
             throw new IllegalArgumentException("not supported yet");
         }
-        // not first round. check previous round results
+        // not first round. check that previous round has all results
         RoundMatching lastRoundMatching = allMatchings.get(currentRound - 2);
         if (!lastRoundMatching.hasAllResults()) {
             throw new IllegalStateException("Round " + (currentRound - 1) + " results were not set yet");
         }
 
         // need to pair new round
-        RoundMatching matching = pairRound();
+        RoundMatching matching = getNextRoundMatching();
         allMatchings.add(matching);
         return matching;
     }
 
-    private RoundMatching pairRound() {
+    private RoundMatching getNextRoundMatching() {
 
         // sort the players based on their score
         List<Player> sortedPlayers = new ArrayList<Player>(players);

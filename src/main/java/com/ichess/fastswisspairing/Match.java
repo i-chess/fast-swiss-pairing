@@ -60,9 +60,21 @@ public class Match {
     }
 
     public enum MatchResult {
+        /**
+         * match has no result assigned yet
+         */
         MATCH_RESULT_NO_RESULT,
+        /**
+         * player 1 won and receive 1 point to its score
+         */
         MATCH_RESULT_PLAYER_1_WON,
+        /**
+         * player 2 won and receive 1 point to its score
+         */
         MATCH_RESULT_PLAYER_2_WON,
+        /**
+         * match ended in a draw and each player got 0.5 points
+         */
         MATCH_RESULT_DRAW,
     }
 }

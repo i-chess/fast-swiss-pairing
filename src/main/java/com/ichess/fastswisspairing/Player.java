@@ -17,18 +17,32 @@ public class Player implements Comparable<Player> {
         this.name = name;
     }
 
+    /**
+     * return the player index in the tournmanet.
+     * player indexes are in the range [ 0..N-1 ], given that there are N players in the tournament
+     * @return the player index in the tournmanet.
+     */
     public int getIndex() {
         return index;
     }
 
+    /**
+     * Return the round in which the player was not paired ("bye" round).
+     * Returns 0 if there is no such round
+     * @return the round in which the player was not paired ("bye" round).
+     */
     public int getByeRound() {
         return byeRound;
     }
 
-    public void setByeRound(int byeRound) {
+    void setByeRound(int byeRound) {
         this.byeRound = byeRound;
     }
 
+    /**
+     * return the player name
+     * @return the player name
+     */
     public String getName() {
         return name;
     }

@@ -27,7 +27,7 @@ public class FastSwissPairingRandomTest extends TestCase {
         List<Match> allMatches = new ArrayList<Match>();
         for (int round = 1; round <= rounds; round++) {
             pairedPlayers = new ArrayList<Player>();
-            RoundMatching matching = tournament.nextRound();
+            RoundMatching matching = tournament.pairNextRound();
             assertEquals(matching.getMatches().size(), players.size() / 2);
             for (Match match : matching.getMatches()) {
                 LOGGER.info("paired match " + match);
