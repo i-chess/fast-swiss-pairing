@@ -19,7 +19,6 @@ public class Tournament {
     private FirstRoundMatchingRule firstRoundMatchingRule;
     private List<Match> allMatches = new ArrayList<Match>();
     private List<RoundMatching> allMatchings = new ArrayList<RoundMatching>();
-    private Random random = new Random();
 
     /**
      * create a new tournmant
@@ -52,9 +51,20 @@ public class Tournament {
         this(rounds, numberOfPlayers, null);
     }
 
+    /**
+     * return the number of rounds in the tournament
+     * @return the number of rounds in the tournament
+     */
     public int getRounds() {
         return rounds;
     }
+
+    /**
+     * return the current round in this tournment
+     * return 0 if tournment was not started yet
+     * @return the current round in this tournment
+     */
+    public int getCurrentRound() { return currentRound; };
 
     public void setFirstRoundMatchingRule(FirstRoundMatchingRule firstRoundMatchingRule) {
         if (currentRound != 0) {
@@ -90,10 +100,10 @@ public class Tournament {
         RoundMatching matching = new RoundMatching(currentRound);
         List<Player> notPairedYet = new ArrayList<Player>(players);
         while (notPairedYet.size() > 1) {
-            int player1Index = random.nextInt(notPairedYet.size());
+            int player1Index = Utils.random.nextInt(notPairedYet.size());
             Player player1 = notPairedYet.get(player1Index);
             notPairedYet.remove(player1Index);
-            int player2Index = random.nextInt(notPairedYet.size());
+            int player2Index = Utils.random.nextInt(notPairedYet.size());
             Player player2 = notPairedYet.get(player2Index);
             notPairedYet.remove(player2Index);
             Match match = new Match(currentRound, player1, player2);

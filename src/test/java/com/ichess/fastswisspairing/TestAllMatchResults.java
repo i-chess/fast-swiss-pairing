@@ -5,7 +5,7 @@ import junit.framework.TestCase;
 import java.util.*;
 import java.util.logging.Logger;
 
-public class FastSwissPairingAllResultsTest extends TestCase {
+public class TestAllMatchResults extends TestCase {
 
     private final static Logger LOGGER = Logger.getLogger(Tournament.class.getName());
     private Random random = new Random();
@@ -25,10 +25,12 @@ public class FastSwissPairingAllResultsTest extends TestCase {
         List<Match> allMatches = new ArrayList<Match>();
         for (int round = 1; round <= rounds; round++) {
             pairedPlayers = new ArrayList<Player>();
+            assertEquals(tournament.getCurrentRound(), round-1);
             RoundMatching matching = tournament.pairNextRound();
+            assertEquals(tournament.getCurrentRound(), round);
             assertEquals(matching.getMatches().size(), players.size() / 2);
             for (Match match : matching.getMatches()) {
-                LOGGER.info("paired match " + match);
+                LOGGER.fine("paired match " + match);
                 assertNotNull(match);
                 assertFalse(pairedPlayers.contains(match.getPlayer1()));
                 assertFalse(pairedPlayers.contains(match.getPlayer2()));
@@ -44,20 +46,25 @@ public class FastSwissPairingAllResultsTest extends TestCase {
     private void testAllTournmentResults(int rounds, int players)
     {
         int gamesPerRound = players / 2;
-        Match.MatchResult[] allResults = new Match.MatchResult[rounds * gamesPerRound];
+        int totalGames = rounds * gamesPerRound;
+        int totalMatchResultOptions = (0x1 << totalGames);
 
-        for (int round=0;round<rounds;round++)
-        {
-            for (int game=0;game<gamesPerRound;game++) {
-                int index = (round * rounds) + game;
-                for (Match.MatchResult result : Match.MatchResult.values()) {
-                    if (result == Match.MatchResult.MATCH_RESULT_NO_RESULT) {
-                        continue;
-                    }
-                    allResults[index] = result;
-                    Tournament tournament = new Tournament(rounds, players);
-                    testTournment(tournament, Arrays.asList(allResults));
+        Match.MatchResult[] allResults = new Match.MatchResult[totalGames];
+        int nextPrintIndex = 0;
+        for (int index = 0; index < totalMatchResultOptions; index ++ ) {
+            for (int bit = 0; bit < totalGames; bit ++)
+            {
+                if ((index & (0x1 << bit )) == 0) {
+                    allResults[bit] = Match.MatchResult.MATCH_RESULT_PLAYER_1_WON;
+                } else {
+                    allResults[bit] = Match.MatchResult.MATCH_RESULT_PLAYER_2_WON;
                 }
+            }
+            Tournament tournament = new Tournament(rounds, players);
+            testTournment(tournament, Arrays.asList(allResults));
+            if (index > nextPrintIndex) {
+                LOGGER.info("tested " + index + "/" + totalMatchResultOptions + " match result options so far");
+                nextPrintIndex += (totalMatchResultOptions / 100);
             }
         }
     }
@@ -72,13 +79,5 @@ public class FastSwissPairingAllResultsTest extends TestCase {
 
     public void testAllResults_8players_4rounds() {
         testAllTournmentResults(4, 8);
-    }
-
-    public void testAllResults_10players_5rounds() {
-        testAllTournmentResults(5, 10);
-    }
-
-    public void testAllResults_12players_6rounds() {
-        testAllTournmentResults(6, 12);
     }
 }
