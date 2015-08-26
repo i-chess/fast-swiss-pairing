@@ -1,0 +1,81 @@
+<project default="all">
+
+    <!-- never override git private files -->
+    <defaultexcludes add="**/.git" default="on"/>
+
+    <!-- detect os -->
+    <condition property="is_linux">
+        <os family="unix" />
+    </condition>
+
+    <condition property="is_windows">
+        <os family="windows" />
+    </condition>
+
+    <property name="lib.name"  	    value="fast-swiss-pairing"/>
+    <property name="version"   	    value="1.0"/>
+
+    <!-- set to true to see detailed ant output -->
+    <property name="debug"   		value="false"/>
+
+    <property name="src.dir"     	value="src/main/java"/>
+    <property name="test.dir"     	value="src/test/java"/>
+    <property name="lib.dir"     	value="lib"/>
+    <property name="build.dir"   	value="build"/>
+
+    <echo>Java Version via Ant: ${ant.java.version}</echo>
+
+    <path id="classpath">
+        <fileset dir="${lib.dir}" includes="*.jar"/>
+        <dirset dir="${build.dir}"/>
+    </path>
+
+    <path id="classpath-test">
+        <fileset dir="${lib.dir}" includes="*.jar"/>
+        <dirset dir="${build.dir}"/>
+        <dirset dir="${build.dir}/test"/>
+    </path>
+
+    <assertions><enable/></assertions>
+
+    <target name="clean" description="clean java build">
+        <delete includeemptydirs="true" verbose="${debug}"  failonerror="no">
+            <fileset dir="${build.dir}" includes="**/*"/>
+        </delete>
+    </target>
+
+    <target name="compile" depends="clean" description="compile the Java sources" >
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${build.dir}/test"/>
+        <javac classpathref="classpath" encoding="UTF-8" debug="true" srcdir="${src.dir}" destdir="${build.dir}" verbose="${debug}" includeantruntime="false">
+        </javac>
+        <javac classpathref="classpath" encoding="UTF-8" debug="true" srcdir="${test.dir}" destdir="${build.dir}/test" verbose="${debug}" includeantruntime="false">
+        </javac>
+    </target>
+
+    <!--    build export/ichess.jar file to be used in other projects (i.e androind proect)
+            the jar contains core,util and game packages. -->
+    <target name="jar" depends="compile">
+        <delete file="bin/${lib.name}-${version}.jar"></delete>
+        <jar destfile="bin/${lib.name}-${version}.jar" update="true">
+            <fileset dir="${build.dir}" includes="com/ichess/fastswisspairing/**" />
+        </jar>
+        <jar destfile="bin/${lib.name}-${version}-sources.jar" update="true">
+            <fileset dir="${build.dir}" includes="com/ichess/fastswisspairing/**" />
+            <fileset dir="${src.dir}" includes="com/ichess/fastswisspairing/**/*.java" />
+        </jar>
+    </target>
+
+    <target name="test" depends="compile">
+        <junit haltonerror="true">
+            <classpath refid="classpath-test"></classpath>
+            <batchtest>
+                <fileset dir="${test.dir}">
+                    <include name="**/*Test*"></include>
+                </fileset>
+            </batchtest>
+            <formatter type="brief" usefile="false"/>
+        </junit>
+    </target>
+    <target name="all" depends="clean, compile, test, jar" />
+</project>

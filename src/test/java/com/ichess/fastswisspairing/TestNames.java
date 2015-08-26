@@ -18,7 +18,6 @@ public class TestNames extends TestCase {
     }
 
     public void test_namesWithNullThrows() {
-
         try {
             new Tournament(1, 3, Arrays.asList("Alice", "Bob", null));
         } catch (IllegalArgumentException ex) {

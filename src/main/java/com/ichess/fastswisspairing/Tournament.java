@@ -217,6 +217,7 @@ public class Tournament {
                     continue;
                 }
 
+                // TODO: add option to choose chess like best color (white/black) based on previous games
                 Match match = newMatching.addMatch(bestScorePlayer, nextScorePlayer);
                 allMatches.add(match);
                 matchForBestPlayerFound = true;

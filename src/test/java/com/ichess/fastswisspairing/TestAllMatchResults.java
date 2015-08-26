@@ -64,7 +64,7 @@ public class TestAllMatchResults extends TestCase {
             testTournment(tournament, Arrays.asList(allResults));
             if (index > nextPrintIndex) {
                 LOGGER.info("tested " + index + "/" + totalMatchResultOptions + " match result options so far");
-                nextPrintIndex += (totalMatchResultOptions / 100);
+                nextPrintIndex += (totalMatchResultOptions / 10);
             }
         }
     }
