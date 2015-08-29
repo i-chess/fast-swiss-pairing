@@ -1,56 +1,32 @@
 package com.ichess.fastswisspairing;
 
+import com.ichess.jvoodoo.*;
 import junit.framework.TestCase;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.logging.Logger;
+import org.junit.*;
+import static org.junit.Assert.*;
 
-public class TestFirstRoundPairing extends TestCase {
+public class TestFirstRoundPairing {
 
     private final static Logger LOGGER = Logger.getLogger(Tournament.class.getName());
-    private Random random = new Random();
 
-    private void testTournment(Tournament tournament) {
-        int rounds = tournament.getRounds();
-
-        List<Player> players = tournament.getPlayers();
-        for (int index = 0; index < players.size(); index++) {
-            Player player = players.get(index);
-            assertEquals(player.getName(), "player-" + (index + 1));
-        }
-
-        tournament.setFirstRoundMatchingRule(Tournament.FirstRoundMatchingRule.values()[random.nextInt(2)]);
-        List<Player> pairedPlayers;
-        List<Match> allMatches = new ArrayList<Match>();
-        for (int round = 1; round <= rounds; round++) {
-            pairedPlayers = new ArrayList<Player>();
-            RoundMatching matching = tournament.pairNextRound();
-            assertEquals(matching.getMatches().size(), players.size() / 2);
-            for (Match match : matching.getMatches()) {
-                LOGGER.fine("paired match " + match);
-                assertNotNull(match);
-                assertFalse(pairedPlayers.contains(match.getPlayer1()));
-                assertFalse(pairedPlayers.contains(match.getPlayer2()));
-                pairedPlayers.add(match.getPlayer1());
-                pairedPlayers.add(match.getPlayer2());
-                match.setResult(Match.MatchResult.values()[(random.nextInt(3)) + 1]);
-                assertFalse(Utils.listContainsMatchBetweenPlayers(allMatches, match.getPlayer1(), match.getPlayer2()));
-                allMatches.add(match);
-            }
-        }
+    @Before
+    public void setUp() throws java.lang.Exception {
+        Voodoo.castVoodooOn("com.ichess.fastswisspairing.RandomWrapper");
     }
 
-    public void testInitialFirstRoundRandom() {
-        Tournament tournament = new Tournament(5, 10);
-        tournament.setFirstRoundMatchingRule(Tournament.FirstRoundMatchingRule.FIRST_ROUND_MATCH_RANDOM);
-        tournament.pairNextRound();
-        // TODO how do I check that its random
-    }
-
+    @Test
     public void testInitialFirstRoundOrdered() {
+        Scenario scenario = new Scenario();
+        scenario.add(new Construction("com.ichess.fastswisspairing.RandomWrapper", "fake random"));
         Tournament tournament = new Tournament(5, 10);
+        scenario.assertFinished();
+
         tournament.setFirstRoundMatchingRule(Tournament.FirstRoundMatchingRule.FIRST_ROUND_MATCH_ORDERED);
         RoundMatching matching = tournament.pairNextRound();
         int index = 1;
@@ -62,5 +38,39 @@ public class TestFirstRoundPairing extends TestCase {
             index ++;
         }
     }
+
+    @Test
+    public void testInitialFirstRoundRandom() {
+        Scenario scenario = new Scenario();
+        scenario.add(new Construction("com.ichess.fastswisspairing.RandomWrapper", "fake random"));
+        Tournament tournament = new Tournament(5, 10);
+        scenario.assertFinished();
+
+        tournament.setFirstRoundMatchingRule(Tournament.FirstRoundMatchingRule.FIRST_ROUND_MATCH_RANDOM);
+        Random random = new java.util.Random();
+        List<Integer> playerIndexes = new ArrayList<Integer>();
+        List<Integer> expectedIndexes = new ArrayList<Integer>();
+        for (int i=0;i<10;i++) {
+            playerIndexes.add(i);
+        }
+        for (int i=0;i<10;i++) {
+
+            int randomResult = random.nextInt(10 - i);
+            scenario.add(new Invocation("fake random", "nextInt", randomResult, new ParameterEquals(10 - i)));
+            expectedIndexes.add(playerIndexes.remove(randomResult));
+        }
+        RoundMatching matching = tournament.pairNextRound();
+        int index = 0;
+        for (Match match : matching.getMatches())
+        {
+            assertEquals(match.getPlayer1().getIndex(), expectedIndexes.get(index).intValue());
+            index ++;
+            assertEquals(match.getPlayer2().getIndex(), expectedIndexes.get(index).intValue());
+            index ++;
+        }
+        scenario.assertFinished();
+    }
+
+
 
 }

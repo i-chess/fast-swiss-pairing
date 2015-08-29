@@ -46,10 +46,7 @@
 
     <target name="compile" depends="clean" description="compile the Java sources" >
         <mkdir dir="${build.dir}"/>
-        <mkdir dir="${build.dir}/test"/>
         <javac classpathref="classpath" encoding="UTF-8" debug="true" srcdir="${src.dir}" destdir="${build.dir}" verbose="${debug}" includeantruntime="false">
-        </javac>
-        <javac classpathref="classpath" encoding="UTF-8" debug="true" srcdir="${test.dir}" destdir="${build.dir}/test" verbose="${debug}" includeantruntime="false">
         </javac>
     </target>
 
@@ -67,9 +64,12 @@
     </target>
 
     <target name="test" depends="compile">
-        <junit haltonerror="true">
+        <mkdir dir="${build.dir}/test"/>
+        <javac classpathref="classpath-test" encoding="UTF-8" debug="true" srcdir="${test.dir}" destdir="${build.dir}/test" verbose="${debug}" includeantruntime="false">
+        </javac>
+        <junit haltonerror="true" fork="true" forkmode="perTest">
             <classpath refid="classpath-test"></classpath>
-            <batchtest>
+            <batchtest fork="true">
                 <fileset dir="${test.dir}">
                     <include name="**/*Test*"></include>
                 </fileset>

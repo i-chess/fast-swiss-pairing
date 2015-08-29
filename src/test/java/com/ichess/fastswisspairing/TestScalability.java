@@ -1,14 +1,14 @@
 package com.ichess.fastswisspairing;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.logging.Logger;
+import static org.junit.Assert.*;
 
-public class TestScalability extends TestCase {
+public class TestScalability {
 
     private final static Logger LOGGER = Logger.getLogger(Tournament.class.getName());
     private Random random = new Random();
@@ -43,11 +43,13 @@ public class TestScalability extends TestCase {
         }
     }
 
+    @Test
     public void testSimpleTournment_100players_50rounds() {
         Tournament tournament = new Tournament(20, 40);
         testTournment(tournament);
     }
 
+    @Test
     public void testSimpleTournment_1000players_50rounds() {
         Tournament tournament = new Tournament(20, 1000);
         testTournment(tournament);

@@ -1,14 +1,14 @@
 package com.ichess.fastswisspairing;
 
-import junit.framework.TestCase;
-
 import java.util.*;
 import java.util.logging.Logger;
+import org.junit.*;
+import static org.junit.Assert.*;
 
-public class TestAllMatchResults extends TestCase {
+public class TestAllMatchResults {
 
     private final static Logger LOGGER = Logger.getLogger(Tournament.class.getName());
-    private Random random = new Random();
+    private RandomWrapper random = new RandomWrapper();
 
     private void testTournment(Tournament tournament, List<Match.MatchResult> results) {
         int rounds = tournament.getRounds();
@@ -69,14 +69,17 @@ public class TestAllMatchResults extends TestCase {
         }
     }
 
+    @Test
     public void testAllResults_4players_2rounds() {
         testAllTournmentResults(2, 4);
     }
 
+    @Test
     public void testAllResults_6players_3rounds() {
         testAllTournmentResults(3, 6);
     }
 
+    @Test
     public void testAllResults_8players_4rounds() {
         testAllTournmentResults(4, 8);
     }

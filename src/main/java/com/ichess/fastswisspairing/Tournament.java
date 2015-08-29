@@ -3,7 +3,6 @@ package com.ichess.fastswisspairing;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 import java.util.logging.Logger;
 
 /**
@@ -19,7 +18,7 @@ public class Tournament {
     private FirstRoundMatchingRule firstRoundMatchingRule;
     private List<Match> allMatches = new ArrayList<Match>();
     private List<RoundMatching> allMatchings = new ArrayList<RoundMatching>();
-
+    private RandomWrapper random = new RandomWrapper();
     /**
      * create a new tournmant
      * @param rounds number of rounds in the tournment. must be >= 1
@@ -100,10 +99,10 @@ public class Tournament {
         RoundMatching matching = new RoundMatching(currentRound);
         List<Player> notPairedYet = new ArrayList<Player>(players);
         while (notPairedYet.size() > 1) {
-            int player1Index = Utils.random.nextInt(notPairedYet.size());
+            int player1Index = random.nextInt(notPairedYet.size());
             Player player1 = notPairedYet.get(player1Index);
             notPairedYet.remove(player1Index);
-            int player2Index = Utils.random.nextInt(notPairedYet.size());
+            int player2Index = random.nextInt(notPairedYet.size());
             Player player2 = notPairedYet.get(player2Index);
             notPairedYet.remove(player2Index);
             Match match = new Match(currentRound, player1, player2);
@@ -145,6 +144,15 @@ public class Tournament {
         RoundMatching matching = getNextRoundMatching();
         allMatchings.add(matching);
         return matching;
+    }
+
+    private static boolean listContainsMatchBetweenPlayers(List<Match> matches, Player player1, Player player2) {
+        for (Match match : matches) {
+            if (match.hasPlayers(player1, player2)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private RoundMatching getNextRoundMatching() {
@@ -211,7 +219,7 @@ public class Tournament {
                 }
 
                 // check if such game already happened
-                if (Utils.listContainsMatchBetweenPlayers(allMatches, bestScorePlayer, nextScorePlayer)) {
+                if (listContainsMatchBetweenPlayers(allMatches, bestScorePlayer, nextScorePlayer)) {
                     // already played. find next opp
                     LOGGER.fine("round " + currentRound + " game " + bestScorePlayer + " - " + nextScorePlayer + " exists");
                     continue;
@@ -245,8 +253,8 @@ public class Tournament {
                 Player player1 = pairedGame.getPlayer1();
                 Player player2 = pairedGame.getPlayer2();
 
-                if ((Utils.listContainsMatchBetweenPlayers(allMatches, bestScorePlayer, player1)) &&
-                        (Utils.listContainsMatchBetweenPlayers(allMatches, bestScorePlayer, player2))) {
+                if ((listContainsMatchBetweenPlayers(allMatches, bestScorePlayer, player1)) &&
+                        (listContainsMatchBetweenPlayers(allMatches, bestScorePlayer, player2))) {
                     // we can't use this pair because the best score user already played vs both of them
                     continue;
                 }
@@ -277,8 +285,8 @@ public class Tournament {
 
                     // ok ! the last thing to check it that it is possible to make some pairing switch
 
-                    if (!((Utils.listContainsMatchBetweenPlayers(allMatches, player1, switchPlayer)) ||
-                            (Utils.listContainsMatchBetweenPlayers(allMatches, player2, bestScorePlayer)))) {
+                    if (!((listContainsMatchBetweenPlayers(allMatches, player1, switchPlayer)) ||
+                            (listContainsMatchBetweenPlayers(allMatches, player2, bestScorePlayer)))) {
                         // we can switch. wid vs the switch user, best player vs bid
                         LOGGER.fine("pairing remove game " + pairedGame);
 
@@ -296,8 +304,8 @@ public class Tournament {
                         break;
                     }
 
-                    if (!((Utils.listContainsMatchBetweenPlayers(allMatches, player2, switchPlayer)) ||
-                            (Utils.listContainsMatchBetweenPlayers(allMatches, player1, bestScorePlayer)))) {
+                    if (!((listContainsMatchBetweenPlayers(allMatches, player2, switchPlayer)) ||
+                            (listContainsMatchBetweenPlayers(allMatches, player1, bestScorePlayer)))) {
                         // we can switch. wid vs the switch user, best player vs bid
                         LOGGER.fine("pairing remove game " + pairedGame);
 
